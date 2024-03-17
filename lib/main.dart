@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 
@@ -33,34 +35,78 @@ class MyHomePage extends StatelessWidget {
         title: const Text('DOM Exception issue Demo'),
       ),
       body: Center(
-        child: FilledButton(
-          onPressed: () {
-            try {
-              web.window.navigator.unknownFunction();
-            } on web.DOMException catch (e) {
-              print('Caught DOMException: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('DOMException: ${e.name} ${e.message}'),
-                ),
-              );
-            } on NoSuchMethodError catch (e) {
-              print('Caught NoSuchMethodError: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('NoSuchMethodError: ${e.runtimeType}'),
-                ),
-              );
-            } on Object catch (e) {
-              print('Caught Object: $e');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Object: ${e.runtimeType}'),
-                ),
-              );
-            }
-          },
-          child: const Text('package:web DOMException'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FilledButton(
+              onPressed: () {
+                try {
+                  web.window.navigator.unknownFunction();
+                } on web.DOMException catch (e) {
+                  print('Caught DOMException: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('DOMException: ${e.name} ${e.message}'),
+                    ),
+                  );
+                } on NoSuchMethodError catch (e) {
+                  print('Caught NoSuchMethodError: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('NoSuchMethodError: ${e.runtimeType}'),
+                    ),
+                  );
+                } on Object catch (e) {
+                  print('Caught Object: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Object: ${e.runtimeType}'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('invalid function call'),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            FilledButton(
+              onPressed: () async {
+                try {
+                  await web.window.navigator
+                      .setAppBadge(
+                        'test'.toJS,
+                      )
+                      .toDart;
+                } on web.DOMException catch (e) {
+                  print('Caught DOMException: $e');
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('DOMException: ${e.name} ${e.message}'),
+                    ),
+                  );
+                } on NoSuchMethodError catch (e) {
+                  print('Caught NoSuchMethodError: $e');
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('NoSuchMethodError: ${e.runtimeType}'),
+                    ),
+                  );
+                } on Object catch (e) {
+                  print('Caught Object: $e');
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Object: ${e.runtimeType}'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('function call with invalid data'),
+            ),
+          ],
         ),
       ),
     );
@@ -69,4 +115,6 @@ class MyHomePage extends StatelessWidget {
 
 extension on web.Navigator {
   external void unknownFunction();
+
+  external JSPromise setAppBadge(JSAny data);
 }
